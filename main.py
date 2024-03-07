@@ -2,32 +2,9 @@ import uuid
 import json
 
 
-def read_json_data():
-    company_data = {}
-    # with open('saved_data.json', 'r') as file:
-    #     jsondata = file.read()
-    #     if jsondata.strip() != "":
-    #         company_data = json.loads(jsondata)
-    #         print(company_data)
-    return company_data
-
-
-def save_json_data(company):
-    # with open('saved_data.json', 'w') as file:
-    #     data = {}
-    #     for department_name in company:
-    #         data[department_name] = company[department_name].__json__()
-    #     file.write(json.dumps(data))
-    print('Saved data')
-
-
-# Company data
-company = read_json_data()
-
-
 class Employee:
-    def __init__(self, name, title, department):
-        self.ID = uuid.uuid4()
+    def __init__(self, name, title, department, ID=None):
+        self.ID = ID if ID else uuid.uuid4()
         self.name = name
         self.title = title
         self.department = department
@@ -40,7 +17,7 @@ class Employee:
 
     def __json__(self):
         return {
-            'ID': self.ID,
+            'ID': str(self.ID),
             'name': self.name,
             'title': self.title,
             'department': self.department
@@ -48,9 +25,9 @@ class Employee:
 
 
 class Department:
-    def __init__(self, department_name):
+    def __init__(self, department_name, employees_list=[]):
         self.department_name = department_name
-        self.employees_list = []
+        self.employees_list = employees_list
 
     def add_employee(self, employee):
         self.employees_list.append(employee)
@@ -70,6 +47,54 @@ class Department:
             'department_name': self.department_name,
             'employees_list': [emp.__json__() for emp in self.employees_list]
         }
+
+
+class DataEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Department):
+            return o.__json__()
+        elif isinstance(o, Employee):
+            return o.__json__()
+        else:
+            return super().default(o)
+
+
+def object_decoder(obj):
+    decoded_obj = {}
+    for key in obj:
+        department_name = obj[key]['department_name']
+        employees_list = obj[key]['employees_list']
+        emp_object_list = []
+        for emp in employees_list:
+            emp_object_list.append(Employee(
+                name=emp['name'],
+                title=emp['title'],
+                department=emp['department'],
+                ID=emp['ID']
+            ))
+        department = Department(
+            department_name=department_name, employees_list=emp_object_list)
+        decoded_obj[key] = department
+    return decoded_obj
+
+
+def read_json_data():
+    company_data = {}
+    with open('saved_data.json', 'r') as file:
+        jsondata = file.read()
+        if jsondata.strip() != "":
+            company_data = object_decoder(json.loads(jsondata))
+    return company_data
+
+
+def save_json_data(company):
+    with open('saved_data.json', 'w') as file:
+        file.write(json.dumps(company, cls=DataEncoder, indent=4))
+    print('Saved data')
+
+
+# Company data
+company = read_json_data()
 
 
 def app_department_to_company(department):
@@ -95,6 +120,9 @@ def add_new_employee_handler():
 
     employee_name = input('Enter employee name: ')
     employee_title = input('Enter employee title: ')
+
+    if not employee_name or not employee_title:
+        raise Exception('Invalid detail entered')
 
     print('Select department')
     display_all_departments()

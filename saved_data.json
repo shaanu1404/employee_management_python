@@ -1,1 +1,30 @@
-{"software": {"department_name": "software", "employees_list": "[]"}}
+{
+    "software": {
+        "department_name": "software",
+        "employees_list": [
+            {
+                "ID": "44f53081-1dfb-4ff5-8574-4f5fb1eead74",
+                "name": "harish",
+                "title": "frontend",
+                "department": "software"
+            },
+            {
+                "ID": "221e3ddb-527d-4081-a69d-07acc69a0a25",
+                "name": "hitesh",
+                "title": "frontend",
+                "department": "software"
+            }
+        ]
+    },
+    "network": {
+        "department_name": "network",
+        "employees_list": [
+            {
+                "ID": "f44b1930-44e2-4f32-ae17-4fe6551d8b75",
+                "name": "samyukta",
+                "title": "networking",
+                "department": "network"
+            }
+        ]
+    }
+}
